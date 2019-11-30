@@ -38,6 +38,10 @@ let
           patchShebangs ghc*/configure
           sed -i 's@utils/ghc-pwd/dist-install/build/tmp/ghc-pwd-bindist@pwd@g' ghc*/configure
         '';
+
+        patches =
+          stdenv.lib.optional stdenv.isDarwin ./patches/ghc844/darwin-gcc-version-fix.patch;
+
         buildPhase = ''
           make show VALUE=ProjectVersion > version
         '';
@@ -114,6 +118,9 @@ stdenv.mkDerivation rec {
       sed -i "s|/usr/bin/perl|perl\x00        |" ghc*/ghc/stage2/build/tmp/ghc-stage2
       sed -i "s|/usr/bin/gcc|gcc\x00        |" ghc*/ghc/stage2/build/tmp/ghc-stage2
     '';
+
+  patches =
+    stdenv.lib.optional (version == "8.4.4" && stdenv.isDarwin) ./patches/ghc844/darwin-gcc-version-fix.patch;
 
   configurePlatforms = [ ];
   configureFlags = [
