@@ -1,6 +1,7 @@
 { stdenv, lib, patchelfUnstable
 , perl, gcc, llvm_39
 , ncurses6, ncurses5, gmp, glibc, libiconv
+, pkgs
 }: { bindistTarballs, ncursesVersion }:
 
 # Prebuilt only does native
@@ -29,10 +30,11 @@ let
   # Figure out version of bindist
   version =
     let
-      helper = stdenv.mkDerivation {
+      hostPkgs = import pkgs.path { config = {}; overlays = []; };
+      helper = hostPkgs.stdenv.mkDerivation {
         name = "bindist-version";
         src = bindistTarballs.${stdenv.targetPlatform.system};
-        nativeBuildInputs = [ gcc perl ];
+        nativeBuildInputs = [ hostPkgs.perl ];
         postUnpack = ''
           patchShebangs ghc*/utils/
           patchShebangs ghc*/configure
