@@ -1,6 +1,12 @@
 { pkgs }:
-let mkGhc = v@{ncursesVersion ? "6", ...}: pkgs.callPackage ./artifact.nix {} { bindistTarballs = (mkTarballs v); inherit ncursesVersion;};
-    hashes = import ./hashes.nix;
-    mkTarballs = { src, ...}: builtins.mapAttrs (_plat: v: pkgs.fetchurl v) src;
+let
+  mkGhc = key: v@{ncursesVersion ? "6", ...}:
+    pkgs.callPackage ./artifact.nix {} {
+      bindistTarballs = (mkTarballs v);
+      bindistVersion = v.bindistVersion or null;
+      inherit ncursesVersion key;
+    };
+  hashes = import ./hashes.nix;
+  mkTarballs = { src, ...}: builtins.mapAttrs (_plat: v: pkgs.fetchurl v) src;
 in
-  builtins.mapAttrs (_: v: mkGhc v ) hashes // { inherit mkGhc; }
+  builtins.mapAttrs (key: v: mkGhc key v ) hashes // { inherit mkGhc; }

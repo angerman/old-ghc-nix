@@ -1,7 +1,7 @@
 { stdenv, lib, patchelfUnstable
 , perl, gcc, llvm_39
 , ncurses6, ncurses5, gmp, glibc, libiconv
-}: { bindistTarballs, ncursesVersion }:
+}: { bindistTarballs, ncursesVersion, key, bindistVersion }:
 
 # Prebuilt only does native
 assert stdenv.targetPlatform == stdenv.hostPlatform;
@@ -50,7 +50,9 @@ let
           echo -n "$ProjectVersion" > $out
         '';
       };
-    in lib.readFile helper;
+      hasBinDistVersion = bindistVersion != null;
+      realVersion = lib.readFile helper;
+    in if hasBinDistVersion then bindistVersion else throw "add ${key}.bindistVersion = \"${realVersion}\"; to hashes.nix";
 in
 
 stdenv.mkDerivation rec {
