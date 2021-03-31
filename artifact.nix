@@ -12,8 +12,8 @@ let
 
   libPath = lib.makeLibraryPath ([
     selectedNcurses gmp
-  ] ++ lib.optional (stdenv.hostPlatform.isDarwin) libiconv
-    ++ lib.optional (stdenv.targetPlatform.isLinux) numactl);
+  ] ++ stdenv.lib.optional (stdenv.hostPlatform.isDarwin) libiconv
+    ++ stdenv.lib.optional (stdenv.targetPlatform.isLinux) numactl);
 
   selectedNcurses = {
     "5" = ncurses5;
