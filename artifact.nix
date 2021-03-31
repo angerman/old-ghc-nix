@@ -15,12 +15,10 @@ let
   ] ++ lib.optional (stdenv.hostPlatform.isDarwin) libiconv
     ++ lib.optional (stdenv.targetPlatform.isLinux) numactl);
 
-  ncursesVersion = host.ncursesVersion or "6";
-
   selectedNcurses = {
     "5" = ncurses5;
     "6" = ncurses6;
-  }."${ncursesVersion}";
+  }."${host.ncursesVersion}";
 
   # Better way to do this? Just put this in versions.json
   selectedLLVM = {
@@ -140,8 +138,8 @@ stdenv.mkDerivation rec {
     # N.B. Use patchelfUnstable due to https://github.com/NixOS/patchelf/pull/85
     lib.optionalString stdenv.isLinux ''
       find . -type f -perm -0100 -exec ${patchelfUnstable}/bin/patchelf \
-          --replace-needed libncurses${lib.optionalString stdenv.is64bit "w"}.so.${ncursesVersion} libncurses.so \
-          --replace-needed libtinfo.so.${ncursesVersion} libncurses.so.${ncursesVersion} \
+          --replace-needed libncurses${stdenv.lib.optionalString stdenv.is64bit "w"}.so.${host.ncursesVersion} libncurses.so \
+          --replace-needed libtinfo.so.${host.ncursesVersion} libncurses.so.${host.ncursesVersion} \
           --interpreter ${glibcDynLinker} {} \;
 
       sed -i "s|/usr/bin/perl|perl\x00        |" ghc*/ghc/stage2/build/tmp/ghc-stage2
@@ -214,6 +212,6 @@ stdenv.mkDerivation rec {
     haskellCompilerName = "ghc-${version}";
   };
 
-  meta.license = lib.licenses.bsd3;
-  meta.platforms = [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" ];
+  meta.license = stdenv.lib.licenses.bsd3;
+  meta.platforms = [ "i686-linux" "x86_64-linux" "x86_64-darwin" "aarch64-linux" ];
 }
